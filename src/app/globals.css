@@ -285,3 +285,326 @@ button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ============================================================
+   LANDING PAGE — Enhanced Animations & Styles
+   ============================================================ */
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(135deg, var(--desk-teal), var(--desk-sage), var(--desk-teal));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 6s ease-in-out infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Floating animation for decorative elements */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.float-slow { animation: float 6s ease-in-out infinite; }
+.float-medium { animation: float 4s ease-in-out infinite 0.5s; }
+.float-fast { animation: float 3s ease-in-out infinite 1s; }
+
+/* Pulse ring for CTA buttons */
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(42, 157, 143, 0.4); }
+  70% { box-shadow: 0 0 0 12px rgba(42, 157, 143, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(42, 157, 143, 0); }
+}
+
+.pulse-ring { animation: pulse-ring 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+/* Fade-in-up for scroll reveals (CSS-only with intersection observer later, or just on load) */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.7s ease-out forwards;
+}
+
+.animate-delay-1 { animation-delay: 0.1s; opacity: 0; }
+.animate-delay-2 { animation-delay: 0.2s; opacity: 0; }
+.animate-delay-3 { animation-delay: 0.3s; opacity: 0; }
+.animate-delay-4 { animation-delay: 0.4s; opacity: 0; }
+.animate-delay-5 { animation-delay: 0.5s; opacity: 0; }
+
+/* ML Loop orbit animation */
+@keyframes orbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.orbit-ring {
+  animation: orbit 20s linear infinite;
+}
+
+.orbit-ring-reverse {
+  animation: orbit 15s linear infinite reverse;
+}
+
+/* Glowing dot */
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+.glow-dot {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* Flow line dash animation */
+@keyframes dash-flow {
+  to { stroke-dashoffset: -20; }
+}
+
+.dash-animate {
+  stroke-dasharray: 6 4;
+  animation: dash-flow 1.5s linear infinite;
+}
+
+/* Connector line for design thinking */
+@keyframes draw-line {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* Subtle card glow on hover */
+.card-glow {
+  transition: box-shadow 300ms ease, transform 300ms ease;
+}
+
+.card-glow:hover {
+  box-shadow: 0 8px 32px rgba(42, 157, 143, 0.12), 0 2px 8px rgba(44, 36, 22, 0.08);
+  transform: translateY(-4px);
+}
+
+/* ============================================================
+   SCROLL-REVEAL — triggered by IntersectionObserver
+   ============================================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger children inside a reveal-stagger parent */
+.reveal-stagger .reveal-child {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-stagger.revealed .reveal-child {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-stagger.revealed .reveal-child:nth-child(1) { transition-delay: 0s; }
+.reveal-stagger.revealed .reveal-child:nth-child(2) { transition-delay: 0.1s; }
+.reveal-stagger.revealed .reveal-child:nth-child(3) { transition-delay: 0.2s; }
+.reveal-stagger.revealed .reveal-child:nth-child(4) { transition-delay: 0.3s; }
+.reveal-stagger.revealed .reveal-child:nth-child(5) { transition-delay: 0.4s; }
+.reveal-stagger.revealed .reveal-child:nth-child(6) { transition-delay: 0.5s; }
+.reveal-stagger.revealed .reveal-child:nth-child(7) { transition-delay: 0.6s; }
+.reveal-stagger.revealed .reveal-child:nth-child(8) { transition-delay: 0.7s; }
+
+/* Scale-in variant */
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-scale.revealed {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ============================================================
+   SPARKLE — rotating 4-point star on hero logo
+   ============================================================ */
+@keyframes sparkle-spin {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.7; }
+  50% { transform: rotate(180deg) scale(1.2); opacity: 1; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0.7; }
+}
+
+.sparkle {
+  position: absolute;
+  animation: sparkle-spin 3s ease-in-out infinite;
+}
+
+.sparkle:nth-child(2) { animation-delay: 1s; animation-duration: 2.5s; }
+.sparkle:nth-child(3) { animation-delay: 2s; animation-duration: 3.5s; }
+
+/* ============================================================
+   SHIMMER — sliding shine on CTA buttons
+   ============================================================ */
+@keyframes shimmer-slide {
+  0% { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+
+.shimmer-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  animation: shimmer-slide 3s ease-in-out infinite;
+  animation-delay: 1.5s;
+}
+
+/* ============================================================
+   COUNTER TICK — number counting up effect
+   ============================================================ */
+@keyframes count-pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.count-animate {
+  animation: count-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  opacity: 0;
+}
+
+/* ============================================================
+   ICON FLOAT — subtle hover float for feature icons
+   ============================================================ */
+@keyframes icon-bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-3px) rotate(-2deg); }
+  75% { transform: translateY(-3px) rotate(2deg); }
+}
+
+.icon-bob:hover {
+  animation: icon-bob 0.8s ease-in-out;
+}
+
+/* ============================================================
+   PROGRESS LINE — animated connecting line between steps
+   ============================================================ */
+@keyframes line-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.line-grow {
+  transform-origin: left center;
+  animation: line-grow 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform: scaleX(0);
+}
+
+/* ============================================================
+   TYPEWRITER CURSOR — for hero tagline accent
+   ============================================================ */
+@keyframes blink-caret {
+  0%, 100% { border-color: transparent; }
+  50% { border-color: var(--desk-teal); }
+}
+
+.type-cursor {
+  border-right: 2px solid var(--desk-teal);
+  animation: blink-caret 1s step-end infinite;
+  padding-right: 2px;
+}
+
+/* ============================================================
+   MAGNETIC HOVER — subtle pull effect on cards
+   ============================================================ */
+.magnetic-card {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.3s ease;
+}
+
+.magnetic-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 12px 40px rgba(42, 157, 143, 0.15), 0 4px 12px rgba(44, 36, 22, 0.08);
+}
+
+/* ============================================================
+   MARKETPLACE STOREFRONT — card entrance & bar fill
+   ============================================================ */
+@keyframes storefront-card-in {
+  0% { opacity: 0; transform: translateY(12px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.storefront-card {
+  animation: storefront-card-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes storefront-bar-fill {
+  from { width: 0%; }
+}
+
+.storefront-bar {
+  animation: storefront-bar-fill 1s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
+}
+
+.marketplace-storefront {
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease;
+}
+
+.marketplace-storefront:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 16px 48px rgba(42, 157, 143, 0.12), 0 4px 16px rgba(44, 36, 22, 0.06);
+}
+
+/* ============================================================
+   RIBBON SHINE — accent color sweep on section headings
+   ============================================================ */
+@keyframes ribbon-shine {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.ribbon-text {
+  background: linear-gradient(
+    90deg,
+    var(--desk-ink) 0%,
+    var(--desk-ink) 40%,
+    var(--desk-teal) 50%,
+    var(--desk-ink) 60%,
+    var(--desk-ink) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: ribbon-shine 4s ease-in-out infinite;
+  animation-delay: 1s;
+}
