@@ -45,16 +45,24 @@ export default function RegisterPage() {
       <PaperPage className="w-full max-w-md">
         {/* Brand mark */}
         <div className="text-center mb-8">
-          <div
-            className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-white select-none"
-            style={{ background: "var(--desk-teal)" }}
-          >
-            <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" aria-hidden="true">
-              <rect x="3" y="3" width="7" height="7" rx="1.5" fill="white" opacity="0.9"/>
-              <rect x="14" y="3" width="7" height="7" rx="1.5" fill="white" opacity="0.6"/>
-              <rect x="3" y="14" width="7" height="7" rx="1.5" fill="white" opacity="0.6"/>
-              <rect x="14" y="14" width="7" height="7" rx="1.5" fill="white" opacity="0.9"/>
-            </svg>
+          <div className="mx-auto mb-4 flex items-center justify-center">
+            <div className="relative">
+              <div
+                className="flex h-12 w-12 items-center justify-center rounded-xl text-white text-2xl shadow-lg select-none"
+                style={{ background: "linear-gradient(135deg, var(--desk-teal), #1f7a6f)" }}
+              >
+                ✦
+              </div>
+              <svg className="sparkle absolute -top-1.5 -right-1.5 w-3 h-3" viewBox="0 0 16 16" fill="var(--desk-accent)" aria-hidden>
+                <path d="M8 0l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" />
+              </svg>
+              <svg className="sparkle absolute -bottom-1 -left-2 w-2.5 h-2.5" viewBox="0 0 16 16" fill="var(--desk-teal)" aria-hidden>
+                <path d="M8 0l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" />
+              </svg>
+              <svg className="sparkle absolute top-1 -left-2.5 w-2 h-2" viewBox="0 0 16 16" fill="var(--desk-rose)" aria-hidden>
+                <path d="M8 0l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" />
+              </svg>
+            </div>
           </div>
           <h1
             className="text-2xl font-bold"
@@ -149,4 +157,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-
