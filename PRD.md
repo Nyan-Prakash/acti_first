@@ -1,240 +1,220 @@
 # Product Requirements Document (PRD)
 
 ## Product
-**Name:** Planboard  
-**Type:** Web application (Next.js)  
-**Primary Users:** K-12 teachers
+- Name: Planboard
+- Type: Web application (Next.js App Router)
+- Primary users: K-12 teachers
+- Current status: Implemented MVP with Supabase-backed persistence for activities, saves, and ratings
 
-## 1. Overview
-Planboard is an AI-powered activity generation tool that helps teachers turn lesson context into practical classroom activities. Teachers select grade level and subject, provide lesson information and learning objectives, and receive four structured activity plans with implementation guidance, evaluation criteria, reflection prompts, and suggested resources.
+## 1. Product Overview
+Planboard helps teachers generate classroom-ready activities from lesson context.
 
-The current product includes:
-- A 3-step activity generation wizard
-- AI generation endpoint with streamed output
-- Activity detail pages
-- Activity rating UI
-- Basic email/password authentication (register + login)
+Current implemented experience:
+- Authentication with Supabase Auth (email/password)
+- 3-step generation wizard
+- Streaming AI generation (4 activities per run)
+- Resource URL validation pass
+- Activity persistence to Supabase
+- Marketplace browsing of public activities
+- Save/unsave to personal binder
+- Ratings and review text per activity (upsert)
+- Library management (own activities + saved activities)
+- Delete own generated activities
 
 ## 2. Problem Statement
-Teachers spend significant time designing engaging, standards-aligned classroom activities. Manual planning often creates delays and inconsistencies in quality, especially when adapting to grade level and subject context.
+Teachers need fast, high-quality, context-aware activity plans. Manual planning is time-consuming and inconsistent across grade levels and subjects.
 
-Planboard addresses this by producing ready-to-use activity blueprints from teacher-provided lesson context in seconds.
+Planboard shortens planning time by producing structured, actionable activity blueprints aligned to teacher input.
 
-## 3. Goals and Success Criteria
-### Goals
-- Reduce teacher planning time for activity design.
-- Provide age-appropriate, subject-relevant activities.
-- Improve classroom implementation quality via structured activity outputs.
-- Capture teacher feedback to improve future recommendations.
-
-### Success Criteria (MVP)
-- A user can generate activities end-to-end in under 60 seconds (excluding user typing).
-- Each generation returns exactly 4 activities in valid structured format.
-- At least 90% of generation requests return without server error.
-- Activity detail pages render all required sections for generated activities.
+## 3. Goals
+- Reduce time required to create classroom activities.
+- Produce age-appropriate and subject-relevant plans.
+- Provide implementation-ready detail (materials, phases, evaluation, reflection).
+- Enable discovery and reuse through a shared marketplace and personal binder.
+- Capture rating feedback to surface quality signals.
 
 ## 4. Non-Goals (Current Scope)
-- LMS integration (Google Classroom, Canvas, etc.)
+- LMS integrations (Google Classroom, Canvas)
+- Collaborative editing/workspaces
+- Standards mapping and curriculum import
+- Advanced analytics/admin dashboards
 - Multi-language localization
-- Collaborative editing across users
-- Admin analytics dashboard
-- Automated model fine-tuning from rating data
 
-## 5. Target Users and Personas
-### Primary Persona: Classroom Teacher
-- Teaches K-12 subject classes.
-- Needs quick, practical activities tied to lesson goals.
-- Values implementable instructions over abstract ideas.
+## 5. Primary User Flows
+### 5.1 Auth
+1. User registers on `/register` (Supabase `signUp` with profile metadata name).
+2. User signs in on `/login` (Supabase `signInWithPassword`).
+3. Middleware redirects unauthenticated users from protected routes (`/wizard`, `/library`, `/rate`) to login.
 
-### Secondary Persona: Department Lead / Instructional Coach
-- Reviews or recommends activities.
-- Values consistency, differentiation, and evaluability.
+### 5.2 Activity Generation
+1. Step 1 (`/wizard/step-1`): choose grade level + subject.
+2. Step 2 (`/wizard/step-2`): choose activity type + enter lesson info and learning objectives.
+3. Step 3 (`/wizard/step-3`): auto-calls `/api/generate`.
+4. Client reads text stream, extracts JSON, maps result to local `Activity[]`.
+5. Client calls `/api/validate-urls` and removes invalid resource links from rendering.
+6. Client calls `/api/activities/persist` to store generation request + activities.
+7. If persistence succeeds, temporary generated IDs are replaced with DB UUIDs.
+8. If persistence fails, generated activities still remain usable in session state.
 
-## 6. User Stories
-- As a teacher, I want to choose grade and subject so outputs match my class context.
-- As a teacher, I want to enter lesson info and learning objectives so activities align with my planned instruction.
-- As a teacher, I want multiple activity options so I can choose what fits my classroom constraints.
-- As a teacher, I want detailed activity structure, materials, and assessment criteria so I can run the activity immediately.
-- As a teacher, I want to rate generated activities so future recommendations can improve.
+### 5.3 Browse, Save, Rate, Manage
+1. Marketplace (`/marketplace`) lists public activities with filters/sorting/search.
+2. Detail (`/marketplace/[id]`) shows full activity content, aggregate ratings, and reviews.
+3. Logged-in users can toggle save via `/api/activities/[id]/save`.
+4. Logged-in users can submit/update rating via `/api/ratings`.
+5. Library (`/library`) shows:
+   - My Activities (created by user)
+   - Saved (bookmarked marketplace activities)
+6. User can delete owned activities via `DELETE /api/activities/[id]`.
 
-## 7. Product Scope
-### In Scope (MVP)
-- Landing page with CTA into generation flow.
-- 3-step wizard:
-  - Step 1: grade level + subject
-  - Step 2: activity type + lesson info + learning objectives
-  - Step 3: generation + activity cards
-- Activity detail page with full structured content sections.
-- Rating page with 3 star metrics + optional comment.
-- User registration and login using credentials provider.
-- URL validation for generated resources.
+## 6. Functional Requirements (Implemented)
+### FR-1 Authentication and Access Control
+- Email/password register and login via Supabase.
+- Middleware session refresh on all routes.
+- Protected route enforcement for wizard, library, and rating pages.
+- Authenticated users are redirected away from `/login` and `/register` to `/wizard/step-1`.
 
-### Out of Scope (MVP)
-- Persisted activity library per user in dashboard.
-- Persisted rating submissions.
-- Server-side authorization enforcement on wizard/dashboard routes.
+### FR-2 Wizard Input Collection
+- Step 1 requires grade level and subject.
+- Step 2 requires activity type + both text fields with minimum 10 characters.
+- Wizard state persists in browser session storage through Zustand `persist`.
 
-## 8. Functional Requirements
-### FR-1: Authentication
-- Users can register with name, email, and password.
-- Users can log in with email/password.
-- Invalid credentials and duplicate email conditions must return clear errors.
+### FR-3 AI Generation
+- `POST /api/generate` validates request with Zod (`generateSchema`).
+- Server streams model output from OpenAI (`gpt-4o`) using AI SDK.
+- Prompt instructs exactly 4 activities and a strict JSON structure.
 
-### FR-2: Wizard Step 1 (Context Selection)
-- User must select one grade level from:
-  - Primary School
-  - Middle School
-  - High School
-- User must select one subject from predefined list plus “other”.
-- Continue action remains disabled until both values are set.
+### FR-4 URL Validation
+- `POST /api/validate-urls` performs HEAD checks with timeout.
+- Invalid URLs are removed from displayed resources while preserving titles.
 
-### FR-3: Wizard Step 2 (Lesson Input)
-- User must select one activity type:
-  - Educational
-  - Assessment
-- User must enter:
-  - `lessonInfo` (minimum 10 characters)
-  - `learningObjectives` (minimum 10 characters)
-- Generate button remains disabled until all fields are valid.
+### FR-5 Persistence
+- `POST /api/activities/persist` requires authenticated user.
+- Stores one `generation_requests` row and many `activities` rows.
+- Activities are stored as public (`is_public: true`) for marketplace discovery.
 
-### FR-4: Activity Generation
-- On Step 3 load, app submits request to `/api/generate`.
-- Backend validates payload shape and constraints.
-- AI response is streamed and parsed to JSON.
-- System returns exactly 4 activities.
-- Each activity includes:
-  - title, category, summary
+### FR-6 Marketplace and Library
+- Marketplace supports filter by grade and subject, plus sort modes:
+  - newest
+  - highest_rated
+  - most_rated
+- Marketplace pulls rating aggregates from `activity_stats` view.
+- Library supports text search across title/summary/category and tabs for own vs saved.
+
+### FR-7 Save/Unsave
+- `POST /api/activities/[id]/save` toggles saved state in `saves` table for the current user.
+
+### FR-8 Ratings
+- `POST /api/ratings` validates with Zod and upserts by `(user_id, activity_id)`.
+- `GET /api/ratings?activityId=...` returns current user’s existing rating when logged in.
+- Required metrics: suitability, goalAchievement, recommendation (1-5).
+- Optional: overallRating, reviewText, comment.
+
+### FR-9 Activity Detail Usability
+- Detail views render structured sections:
   - overview
-  - research/preparation description and steps
-  - format and materials
-  - structure with phases and durations
-  - evaluation criteria (+ optional rubric)
+  - research & preparation
+  - format/materials
+  - phased structure
+  - evaluation/rubric
   - reflection questions
   - resources
-  - differentiation (higher/lower level)
+  - differentiation
+- Wizard detail page includes local teacher notes saved in `localStorage`.
 
-### FR-5: Resource URL Validation
-- Generated resource URLs are validated via `/api/validate-urls`.
-- Invalid URLs are removed from link rendering (title remains).
+### FR-10 Deletion
+- `DELETE /api/activities/[id]` only allows owner deletion.
+- API verifies ownership before delete and returns `403` if user is not owner.
 
-### FR-6: Activity Browsing
-- Generated activities are shown as cards on Step 3.
-- Clicking a card opens detail page for selected activity.
-- Detail page renders all structured sections with readable formatting.
-
-### FR-7: Rating Flow
-- User can rate activity on:
-  - suitability
-  - goal achievement
-  - recommendation
-- Each metric requires 1-5 stars.
-- Optional free-text comment allowed.
-- Submission shows confirmation state.
-
-### FR-8: Session-State Behavior
-- Wizard inputs persist within browser session.
-- Generated activities exist in client state for current session flow.
-- Accessing detail/rating without available in-memory activity shows fallback message.
-
-## 9. Data Requirements
-### Core Entities (Defined in Schema)
-- `users`
+## 7. Data Model (Current)
+Core tables:
+- `profiles` (user profile mirrored from `auth.users`)
 - `generation_requests`
 - `activities`
 - `ratings`
+- `saves`
 
-### Current Implementation Note
-- Database schema includes persistence tables for requests, activities, and ratings.
-- Current UI/API implementation primarily uses client-side state for generated activities and rating submission feedback.
-- Full persistence for generation outputs and ratings should be part of next milestone.
+Derived view:
+- `activity_stats` (rating count + averaged rating metrics per activity)
 
-## 10. Non-Functional Requirements
+Key constraints:
+- Ratings unique per user/activity
+- Saves unique per user/activity
+- Foreign keys with cascade deletes from parent records
+
+## 8. Security and Access
+- Supabase row-level security policies are defined in initial migration.
+- Public read access for public activities and ratings aggregate use cases.
+- User-scoped write access for own requests, activities, ratings, and saves.
+- Service-role client is used in `POST /api/activities/persist` for insertion workflow.
+
+## 9. Non-Functional Requirements
 ### Performance
-- First generation response should begin streaming within ~10 seconds under normal load.
-- Typical end-to-end generation completion target: 10-20 seconds.
+- Generation UX targets initial feedback quickly and completion around 10-20 seconds.
+- Marketplace query capped to latest 50 matching public activities.
 
 ### Reliability
-- API should return structured validation errors for invalid input.
-- Graceful failure UI with retry action on generation errors.
-
-### Security
-- Passwords must be hashed (bcrypt).
-- Secrets managed in environment variables.
-- Avoid exposing API keys in client code.
+- Zod validation errors returned for invalid generate/rating payloads.
+- Generation flow has retry path in wizard UI.
+- Persistence failure does not block local session usage.
 
 ### Usability
-- Wizard navigation should be linear and guard prerequisites.
-- Forms must provide clear disabled/validation states.
-- Mobile and desktop layouts must remain usable.
+- Linear wizard progression with guard redirects.
+- Responsive UI across desktop/mobile.
+- Explicit empty states for library and generation errors.
 
-## 11. UX Requirements
-- Clear step progress indicator for wizard stages.
-- Minimal cognitive load per step.
-- Card-based generated result browsing.
-- Detail page optimized for instructional readability (sections, tables, badges).
-- Regenerate action available after successful generation.
-
-## 12. API Requirements
-- `POST /api/register`
-  - Creates user after validation and duplicate check.
-- `POST /api/auth/[...nextauth]`
-  - Authenticates via credentials provider.
+## 10. API Surface (Current)
 - `POST /api/generate`
-  - Validates generate payload and streams model output.
+  - Input: generation context
+  - Output: streamed text response from model
 - `POST /api/validate-urls`
-  - Validates resource URLs and returns valid subset.
+  - Input: `{ urls: string[] }`
+  - Output: `{ valid: string[] }`
+- `POST /api/activities/persist`
+  - Auth required
+  - Input: generation metadata + activities
+  - Output: `{ generationRequestId, activities }`
+- `POST /api/activities/[id]/save`
+  - Auth required
+  - Output: `{ saved: boolean }`
+- `DELETE /api/activities/[id]`
+  - Auth + ownership required
+  - Output: `{ deleted: true }`
+- `POST /api/ratings`
+  - Auth required
+  - Upserts rating
+- `GET /api/ratings?activityId=<uuid>`
+  - Returns current user rating (if present)
 
-## 13. Analytics and KPIs
-### Product Metrics
-- Wizard completion rate (step 1 -> step 3 success).
-- Generation success rate.
-- Average generation latency.
-- Regeneration rate.
-- Rating submission rate per generated activity.
-- Mean star ratings across 3 dimensions.
+## 11. Current Product Surfaces
+- `/` landing page
+- `/login`, `/register`
+- `/wizard/step-1`, `/wizard/step-2`, `/wizard/step-3`
+- `/wizard/step-3/[activityId]`
+- `/marketplace`
+- `/marketplace/[id]`
+- `/library`
+- `/rate/[activityId]`
+- `/dashboard` (redirects to `/library`)
 
-### Quality Metrics
-- Percentage of outputs matching expected JSON structure.
-- Percentage of valid resource URLs after validation.
-- User-reported usefulness (from comment sentiment or explicit survey).
+## 12. Known Gaps and Risks
+- `/api/generate` enforces input schema but does not server-validate AI output schema before client parse.
+- Stream parsing on the client relies on extracting JSON text from model output.
+- URL validation uses HEAD; some valid resources may reject HEAD requests.
+- Marketplace currently assumes all persisted activities are public by default.
+- No explicit rate limiting for generation or rating endpoints.
 
-## 14. Release Plan
-### Phase 1 (Current MVP)
-- Core wizard flow
-- AI generation and display
-- Registration/login
-- Client-side rating confirmation
+## 13. Success Metrics (Recommended Tracking)
+- Wizard completion rate (step 1 to generated results)
+- Generation success/failure rate
+- Time-to-first-activity and full generation duration
+- Persist success rate
+- Save rate (per marketplace view)
+- Rating completion rate
+- Average overall rating and review volume per activity
 
-### Phase 2
-- Persist generation requests, activities, and ratings to DB
-- User-specific dashboard backed by persisted data
-- Route protection for authenticated experiences
-
-### Phase 3
-- Search/filter saved activities
-- Export/share activity plans
-- Feedback-driven recommendation improvements
-
-## 15. Risks and Mitigations
-- AI output schema drift  
-  Mitigation: strict prompt format + server-side schema validation/parsing hardening.
-- Hallucinated/invalid resources  
-  Mitigation: URL validation endpoint and safe rendering fallback.
-- Data loss on refresh/navigation  
-  Mitigation: persist generated results and ratings in backend.
-- Weak auth gating on app routes  
-  Mitigation: enforce middleware/route-level auth checks in next iteration.
-
-## 16. Open Questions
-- Should generation and rating actions require mandatory login?
-- Should ratings be editable after submission?
-- What retention period is needed for generated activities?
-- What minimum dashboard capabilities are required for V1 persistence release?
-
-## 17. Acceptance Criteria (MVP)
-- User can register and log in successfully.
-- User can complete wizard with valid inputs.
-- System generates and displays 4 activities with full structure.
-- User can open each activity detail and view all content sections.
-- User can submit a 3-metric rating with optional comment and receive success confirmation.
-- Error and retry paths work when generation fails.
+## 14. Next Iteration Priorities
+1. Add server-side schema validation/parsing for AI response before returning/accepting results.
+2. Add optional visibility controls (`is_public`) during or after generation.
+3. Add pagination and richer filters in marketplace/library.
+4. Add endpoint rate limiting and observability instrumentation.
+5. Add analytics event pipeline for funnel and quality metrics.

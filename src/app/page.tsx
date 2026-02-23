@@ -19,7 +19,7 @@ export default function Home() {
 
         <div className="inline-flex items-center justify-center mb-6">
           <div
-            className="flex h-16 w-16 items-center justify-center rounded-2xl text-white text-2xl shadow-md select-none"
+            className="flex h-14 w-14 items-center justify-center rounded-2xl text-white text-3xl shadow-md select-none"
             style={{ background: "var(--desk-teal)" }}
           >
             ✦
@@ -51,7 +51,7 @@ export default function Home() {
               size="lg"
               className="text-base px-8 py-5 bg-[var(--desk-teal)] text-white hover:opacity-90 shadow-sm gap-2"
             >
-              ✦ Generate activities
+              Generate activities
             </Button>
           </Link>
           <Link href="/library">
@@ -138,13 +138,21 @@ export default function Home() {
         </div>
         <ul className="flex-1 space-y-3">
           {[
-            { icon: "📋", text: "4 ready-to-run activity blueprints, every time" },
-            { icon: "🎯", text: "Evaluation criteria + optional rubric per activity" },
-            { icon: "💡", text: "Reflection questions and differentiation tips" },
-            { icon: "🔗", text: "Curated resource links — validated before display" },
+            { text: "4 ready-to-run activity blueprints, every time" },
+            { text: "Evaluation criteria + optional rubric per activity" },
+            { text: "Reflection questions and differentiation tips" },
+            { text: "Curated resource links — validated before display" },
           ].map((item) => (
             <li key={item.text} className="flex items-start gap-3">
-              <span className="text-xl shrink-0 mt-0.5">{item.icon}</span>
+              <span
+                className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+                style={{ background: "color-mix(in srgb, var(--desk-teal) 12%, transparent)" }}
+                aria-hidden="true"
+              >
+                <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3" aria-hidden="true">
+                  <path d="M2 6l3 3 5-5" stroke="var(--desk-teal)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
               <span className="text-sm leading-relaxed" style={{ color: "var(--desk-body)" }}>
                 {item.text}
               </span>
@@ -160,7 +168,7 @@ export default function Home() {
             size="lg"
             className="text-base px-10 py-5 bg-[var(--desk-teal)] text-white hover:opacity-90 shadow-md gap-2"
           >
-            Start your first activity →
+            Start your first activity
           </Button>
         </Link>
       </div>

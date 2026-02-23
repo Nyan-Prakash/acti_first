@@ -46,10 +46,15 @@ export default function RegisterPage() {
         {/* Brand mark */}
         <div className="text-center mb-8">
           <div
-            className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-white text-xl select-none"
+            className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-white select-none"
             style={{ background: "var(--desk-teal)" }}
           >
-            ✦
+            <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" aria-hidden="true">
+              <rect x="3" y="3" width="7" height="7" rx="1.5" fill="white" opacity="0.9"/>
+              <rect x="14" y="3" width="7" height="7" rx="1.5" fill="white" opacity="0.6"/>
+              <rect x="3" y="14" width="7" height="7" rx="1.5" fill="white" opacity="0.6"/>
+              <rect x="14" y="14" width="7" height="7" rx="1.5" fill="white" opacity="0.9"/>
+            </svg>
           </div>
           <h1
             className="text-2xl font-bold"
@@ -58,7 +63,7 @@ export default function RegisterPage() {
             Create your account
           </h1>
           <p className="mt-1 text-sm" style={{ color: "var(--desk-muted)" }}>
-            Join thousands of teachers saving planning time.
+            Join educators saving planning time with Planboard.
           </p>
         </div>
 
@@ -126,7 +131,7 @@ export default function RegisterPage() {
             className="w-full bg-[var(--desk-teal)] text-white hover:opacity-90 py-5 text-base"
             disabled={loading}
           >
-            {loading ? "Creating account…" : "Create account →"}
+            {loading ? "Creating account…" : "Create account"}
           </Button>
         </form>
 

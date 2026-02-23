@@ -7,20 +7,23 @@ import { GRADE_LEVELS, SUBJECTS } from "@/lib/constants";
 import { StampBadge, DeskEmptyState } from "@/components/ui-desk";
 import { BinderSearch } from "@/components/library/binder-search";
 import { DeleteActivityButton } from "@/components/activity/delete-activity-button";
+import { CreateFolderButton } from "@/components/library/create-folder-button";
+import { AddToFolderButton } from "@/components/library/add-to-folder-button";
+import { FoldersPanel } from "@/components/library/folders-panel";
 
 const categoryIcons: Record<string, string> = {
-  debate: "🗣️",
-  documentary: "🎬",
-  acting: "🎭",
-  conference: "🎤",
-  experiment: "🧪",
-  project: "📋",
-  presentation: "📊",
-  research: "🔍",
-  game: "🎮",
-  simulation: "🎯",
-  workshop: "🛠️",
-  field_trip: "🚌",
+  debate: "debate",
+  documentary: "documentary",
+  acting: "acting",
+  conference: "conference",
+  experiment: "experiment",
+  project: "project",
+  presentation: "presentation",
+  research: "research",
+  game: "game",
+  simulation: "simulation",
+  workshop: "workshop",
+  field_trip: "field_trip",
 };
 
 function getGradeLabel(value: string) {
@@ -42,14 +45,43 @@ type ActivityRow = {
   created_at: string;
 };
 
-function ActivityGrid({ activities, linkBase, showDelete = false }: { activities: ActivityRow[]; linkBase: string; showDelete?: boolean }) {
+function ActivityCategoryIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className ?? "w-5 h-5"} aria-hidden="true">
+      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/>
+      <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+    </svg>
+  );
+}
+
+type FolderRow = {
+  id: string;
+  name: string;
+  color: string;
+  created_at: string;
+};
+
+type FolderActivityRow = {
+  folder_id: string;
+  activity_id: string;
+};
+
+function ActivityGrid({
+  activities,
+  linkBase,
+  showDelete = false,
+  folders = [],
+  folderActivities = [],
+}: {
+  activities: ActivityRow[];
+  linkBase: string;
+  showDelete?: boolean;
+  folders?: FolderRow[];
+  folderActivities?: FolderActivityRow[];
+}) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       {activities.map((activity, i) => {
-        const icon =
-          categoryIcons[activity.category] ||
-          categoryIcons[activity.category.toLowerCase()] ||
-          "📝";
         const accentColors = ["teal", "rose", "sage", "accent"] as const;
         const accent = accentColors[i % accentColors.length];
         return (
@@ -71,7 +103,15 @@ function ActivityGrid({ activities, linkBase, showDelete = false }: { activities
                   }}
                 />
                 <div className="flex items-start gap-3">
-                  <span className="text-2xl leading-none mt-0.5">{icon}</span>
+                  <span
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md mt-0.5"
+                    style={{
+                      background: `color-mix(in srgb, var(--desk-${accent === "accent" ? "accent" : accent}) 12%, transparent)`,
+                      color: `var(--desk-${accent === "accent" ? "ink" : accent})`
+                    }}
+                  >
+                    <ActivityCategoryIcon className="w-4 h-4" />
+                  </span>
                   <h3 className="font-semibold text-desk-ink leading-snug line-clamp-2 text-base pr-6">
                     {activity.title}
                   </h3>
@@ -93,11 +133,20 @@ function ActivityGrid({ activities, linkBase, showDelete = false }: { activities
                 </p>
               </div>
             </Link>
-            {showDelete && (
-              <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+              {folders.length > 0 && (
+                <AddToFolderButton
+                  activityId={activity.id}
+                  folders={folders}
+                  memberFolderIds={folderActivities
+                    .filter((fa) => fa.activity_id === activity.id)
+                    .map((fa) => fa.folder_id)}
+                />
+              )}
+              {showDelete && (
                 <DeleteActivityButton activityId={activity.id} activityTitle={activity.title} />
-              </div>
-            )}
+              )}
+            </div>
           </div>
         );
       })}
@@ -145,6 +194,29 @@ export default async function LibraryPage({
       ?.map((s) => s.activities as unknown as ActivityRow)
       .filter(Boolean) as ActivityRow[]) ?? [];
 
+  // Fetch folders
+  const { data: foldersData } = await supabase
+    .from("folders")
+    .select("id, name, color, created_at")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: true });
+
+  const folders: FolderRow[] = foldersData ?? [];
+
+  // Fetch folder<->activity links
+  const { data: folderActivitiesData } = await supabase
+    .from("folder_activities")
+    .select("folder_id, activity_id")
+    .eq("user_id", user.id);
+
+  const folderActivities: FolderActivityRow[] = folderActivitiesData ?? [];
+
+  // All activities (mine + saved, deduped) for the folder panel
+  const allActivityMap = new Map<string, ActivityRow>();
+  for (const a of myActivities ?? []) allActivityMap.set(a.id, a);
+  for (const a of savedActivities) allActivityMap.set(a.id, a);
+  const allActivities = Array.from(allActivityMap.values());
+
   // Apply text search
   function filterActivities(list: ActivityRow[]) {
     if (!searchQuery) return list;
@@ -159,8 +231,10 @@ export default async function LibraryPage({
   const filteredMine = filterActivities(myActivities ?? []);
   const filteredSaved = filterActivities(savedActivities);
 
+
   const myCount = myActivities?.length ?? 0;
   const savedCount = savedActivities.length;
+  const folderCount = folders.length;
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8">
@@ -177,6 +251,7 @@ export default async function LibraryPage({
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <BinderSearch />
+          <CreateFolderButton />
           <Link href="/wizard/step-1">
             <Button className="bg-desk-teal text-white hover:opacity-90">
               + New Activity
@@ -195,7 +270,7 @@ export default async function LibraryPage({
             value="my-activities"
             className="text-sm font-semibold data-[state=active]:bg-desk-paper data-[state=active]:text-desk-teal data-[state=active]:shadow-sm rounded-lg px-4 py-2"
           >
-            ✏️ My Activities
+            My Activities
             <span className="ml-1.5 inline-flex items-center justify-center rounded-full bg-desk-teal/10 text-desk-teal text-xs font-bold w-5 h-5">
               {myCount}
             </span>
@@ -204,9 +279,18 @@ export default async function LibraryPage({
             value="saved"
             className="text-sm font-semibold data-[state=active]:bg-desk-paper data-[state=active]:text-desk-teal data-[state=active]:shadow-sm rounded-lg px-4 py-2"
           >
-            🔖 Saved
+            Saved
             <span className="ml-1.5 inline-flex items-center justify-center rounded-full bg-desk-teal/10 text-desk-teal text-xs font-bold w-5 h-5">
               {savedCount}
+            </span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="folders"
+            className="text-sm font-semibold data-[state=active]:bg-desk-paper data-[state=active]:text-desk-teal data-[state=active]:shadow-sm rounded-lg px-4 py-2"
+          >
+            Folders
+            <span className="ml-1.5 inline-flex items-center justify-center rounded-full bg-desk-teal/10 text-desk-teal text-xs font-bold w-5 h-5">
+              {folderCount}
             </span>
           </TabsTrigger>
         </TabsList>
@@ -226,7 +310,13 @@ export default async function LibraryPage({
               <p className="text-lg" style={{ color: "var(--desk-muted)" }}>No activities match &ldquo;{params.q}&rdquo;.</p>
             </div>
           ) : (
-            <ActivityGrid activities={filteredMine} linkBase="/marketplace" showDelete />
+            <ActivityGrid
+              activities={filteredMine}
+              linkBase="/marketplace"
+              showDelete
+              folders={folders}
+              folderActivities={folderActivities}
+            />
           )}
         </TabsContent>
 
@@ -245,8 +335,22 @@ export default async function LibraryPage({
               <p className="text-lg" style={{ color: "var(--desk-muted)" }}>No saved activities match &ldquo;{params.q}&rdquo;.</p>
             </div>
           ) : (
-            <ActivityGrid activities={filteredSaved} linkBase="/marketplace" />
+            <ActivityGrid
+              activities={filteredSaved}
+              linkBase="/marketplace"
+              folders={folders}
+              folderActivities={folderActivities}
+            />
           )}
+        </TabsContent>
+
+        {/* Folders Tab */}
+        <TabsContent value="folders">
+          <FoldersPanel
+            folders={folders}
+            folderActivities={folderActivities}
+            allActivities={allActivities}
+          />
         </TabsContent>
       </Tabs>
     </div>

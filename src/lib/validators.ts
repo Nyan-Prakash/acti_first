@@ -1,5 +1,12 @@
 import { z } from "zod";
 
+export const profileSchema = z.object({
+  subject: z.string().min(2, "Subject must be at least 2 characters").max(100, "Subject must be at most 100 characters"),
+  grade_level: z.string().min(1, "Grade level is required").max(50, "Grade level must be at most 50 characters"),
+});
+
+export type ProfileInput = z.infer<typeof profileSchema>;
+
 export const generateSchema = z.object({
   gradeLevel: z.enum(["primary", "middle_school", "high_school"]),
   subject: z.string().min(1, "Subject is required"),
