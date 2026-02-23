@@ -17,7 +17,7 @@ export default function Home() {
     <div className="space-y-0">
 
       {/* ── Hero ─────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-8 pb-16 md:pt-12 md:pb-20">
+      <section className="relative overflow-hidden min-h-[calc(100vh-4rem)] flex flex-col justify-center pt-8 pb-16 md:pt-12 md:pb-20">
         {/* Background decorative elements */}
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div className="float-slow absolute top-16 left-[8%] w-3 h-3 rounded-full" style={{ background: "var(--desk-teal)", opacity: 0.2 }} />
@@ -57,10 +57,7 @@ export default function Home() {
               </p>
               <p className="animate-fade-in-up animate-delay-4 text-base md:text-lg max-w-xl mx-auto md:mx-0 mb-10 leading-relaxed"
                 style={{ color: "var(--desk-muted)" }}>
-                Describe your lesson, and our ML-driven engine generates four structured,
-                standards-aligned activity plans in seconds — refined by real teacher feedback
-                through our custom feedback loop.
-              </p>
+Just enter your topic and Planboard generates activities your students will love.              </p>
 
               <div className="animate-fade-in-up animate-delay-5 flex flex-col items-center gap-3 sm:flex-row sm:justify-center md:justify-start">
                 <Link href="/wizard/step-1">
