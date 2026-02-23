@@ -4,6 +4,9 @@ export const profiles = pgTable("profiles", {
   id: uuid("id").primaryKey(), // matches auth.users.id
   email: text("email").notNull(),
   name: text("name"),
+  subject: text("subject"),
+  gradeLevel: text("grade_level"),
+  updatedAt: timestamp("updated_at").defaultNow(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -58,4 +61,23 @@ export const saves = pgTable("saves", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => [
   unique("saves_user_activity_unique").on(table.userId, table.activityId),
+]);
+
+export const folders = pgTable("folders", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => profiles.id, { onDelete: "cascade" }).notNull(),
+  name: text("name").notNull(),
+  color: text("color").default("teal").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const folderActivities = pgTable("folder_activities", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  folderId: uuid("folder_id").references(() => folders.id, { onDelete: "cascade" }).notNull(),
+  activityId: uuid("activity_id").references(() => activities.id, { onDelete: "cascade" }).notNull(),
+  userId: uuid("user_id").references(() => profiles.id, { onDelete: "cascade" }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  unique("folder_activities_folder_activity_unique").on(table.folderId, table.activityId),
 ]);

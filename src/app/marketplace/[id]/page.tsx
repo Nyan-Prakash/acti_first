@@ -4,9 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import { ActivityDetail } from "@/components/activity/activity-detail";
 import { SaveButton } from "@/components/activity/save-button";
 import { RatingForm } from "@/components/activity/rating-form";
+import { TeacherNotes } from "@/components/activity/teacher-notes";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { StampBadge } from "@/components/ui-desk";
 import { GRADE_LEVELS, SUBJECTS } from "@/lib/constants";
 import type { ActivityContent } from "@/types";
 
@@ -128,173 +129,171 @@ export default async function MarketplaceDetailPage({
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8">
-      <Link href="/marketplace">
-        <Button variant="ghost" size="sm" className="mb-4">
-          &larr; Back to Marketplace
-        </Button>
-      </Link>
-
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold text-gray-900">
-              {activity.title}
-            </h1>
-            <div className="flex flex-wrap gap-2 mt-3">
-              <Badge variant="secondary" className="capitalize">
-                {activity.category.replace(/_/g, " ")}
-              </Badge>
-              <Badge variant="outline">
-                {getGradeLabel(activity.grade_level)}
-              </Badge>
-              <Badge variant="outline">
-                {getSubjectLabel(activity.subject)}
-              </Badge>
-            </div>
-            <p className="mt-3 text-gray-600">{activity.summary}</p>
-            <p className="mt-2 text-sm text-gray-400">
-              Created by {authorName}
-            </p>
-          </div>
-          {user && (
-            <div className="ml-4 shrink-0">
-              <SaveButton activityId={activity.id} initialSaved={isSaved} />
-            </div>
-          )}
-        </div>
+      {/* Back nav */}
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
+        <Link href="/marketplace">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-desk-muted hover:text-desk-ink -ml-2"
+          >
+            ← Marketplace
+          </Button>
+        </Link>
+        {user && (
+          <SaveButton activityId={activity.id} initialSaved={isSaved} />
+        )}
       </div>
 
-      {/* Rating Summary */}
-      {ratingCount > 0 && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Ratings Summary</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="flex gap-6 items-start">
+        {/* ── Main column ── */}
+        <div className="flex-1 min-w-0 space-y-6">
+          {/* Header */}
+          <div className="space-y-3">
+            <h1
+              className="text-2xl font-bold leading-snug"
+              style={{ fontFamily: "var(--font-fraunces)", color: "var(--desk-ink)" }}
+            >
+              {activity.title}
+            </h1>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge
+                variant="secondary"
+                className="capitalize text-xs"
+                style={{
+                  background: "color-mix(in srgb, var(--desk-teal) 12%, transparent)",
+                  color: "var(--desk-teal)",
+                  border: "1px solid color-mix(in srgb, var(--desk-teal) 30%, transparent)",
+                }}
+              >
+                {activity.category.replace(/_/g, " ")}
+              </Badge>
+              <StampBadge color="ink">{getGradeLabel(activity.grade_level)}</StampBadge>
+              <StampBadge color="ink">{getSubjectLabel(activity.subject)}</StampBadge>
+              <StampBadge color="teal">{content.structure?.duration || "—"}</StampBadge>
+            </div>
+            <p className="text-sm leading-relaxed" style={{ color: "var(--desk-muted)" }}>
+              {activity.summary}
+            </p>
+            <p className="text-xs" style={{ color: "var(--desk-muted)" }}>
+              By {authorName}
+            </p>
+          </div>
+
+          {/* Rating Summary */}
+          {ratingCount > 0 && (
+            <div
+              className="rounded-xl p-4 grid grid-cols-2 gap-4 sm:grid-cols-4"
+              style={{ background: "var(--desk-bg)", border: "1px solid var(--desk-border)" }}
+            >
               {avgOverall !== null && (
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-500">
-                    &#9733; {avgOverall.toFixed(1)}
+                  <div className="text-2xl font-bold" style={{ color: "var(--desk-teal)" }}>
+                    {avgOverall.toFixed(1)} <span className="text-base font-normal" style={{ color: "var(--desk-muted)" }}>/ 5</span>
                   </div>
-                  <div className="text-xs text-gray-500">Overall</div>
+                  <div className="text-xs mt-0.5" style={{ color: "var(--desk-muted)" }}>Overall</div>
                 </div>
               )}
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
+                <div className="text-2xl font-bold" style={{ color: "var(--desk-teal)" }}>
                   {ratingCount}
                 </div>
-                <div className="text-xs text-gray-500">Total Ratings</div>
+                <div className="text-xs mt-0.5" style={{ color: "var(--desk-muted)" }}>Ratings</div>
               </div>
               {avgSuitability !== null && (
                 <div className="text-center">
-                  <div className="text-lg font-semibold">
+                  <div className="text-lg font-semibold" style={{ color: "var(--desk-ink)" }}>
                     {avgSuitability.toFixed(1)}
                   </div>
-                  <div className="text-xs text-gray-500">Avg Suitability</div>
+                  <div className="text-xs mt-0.5" style={{ color: "var(--desk-muted)" }}>Suitability</div>
                 </div>
               )}
               {avgGoalAchievement !== null && (
                 <div className="text-center">
-                  <div className="text-lg font-semibold">
+                  <div className="text-lg font-semibold" style={{ color: "var(--desk-ink)" }}>
                     {avgGoalAchievement.toFixed(1)}
                   </div>
-                  <div className="text-xs text-gray-500">
-                    Avg Goal Achievement
-                  </div>
-                </div>
-              )}
-              {avgRecommendation !== null && (
-                <div className="text-center">
-                  <div className="text-lg font-semibold">
-                    {avgRecommendation.toFixed(1)}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    Avg Recommendation
-                  </div>
+                  <div className="text-xs mt-0.5" style={{ color: "var(--desk-muted)" }}>Goal Achievement</div>
                 </div>
               )}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          )}
 
-      {/* Activity Detail Sections */}
-      <ActivityDetail content={content} />
+          {/* Activity Detail Sections */}
+          <ActivityDetail content={content} />
 
-      {/* Reviews */}
-      {ratings && ratings.length > 0 && (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Reviews ({ratings.length})</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {ratings
-              .filter(
-                (r: { review_text: string | null }) => r.review_text
-              )
-              .map(
-                (
-                  r: {
-                    id: string;
-                    overall_rating: number | null;
-                    review_text: string | null;
-                    profiles: { name: string | null } | null;
-                    created_at: string;
-                  },
-                  i: number
-                ) => (
-                  <div
-                    key={r.id}
-                    className={
-                      i > 0
-                        ? "border-t pt-4"
-                        : ""
-                    }
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-sm">
-                        {(r.profiles as { name: string | null } | null)?.name ||
-                          "Anonymous"}
-                      </span>
-                      {r.overall_rating && (
-                        <span className="text-sm text-yellow-500">
-                          &#9733; {r.overall_rating}
+          {/* Reviews */}
+          {ratings && ratings.filter((r: { review_text: string | null }) => r.review_text).length > 0 && (
+            <div
+              className="rounded-xl p-5 space-y-4"
+              style={{ background: "var(--desk-bg)", border: "1px solid var(--desk-border)" }}
+            >
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--desk-muted)" }}>
+                Reviews ({ratings.filter((r: { review_text: string | null }) => r.review_text).length})
+              </p>
+              {ratings
+                .filter((r: { review_text: string | null }) => r.review_text)
+                .map(
+                  (
+                    r: {
+                      id: string;
+                      overall_rating: number | null;
+                      review_text: string | null;
+                      profiles: { name: string | null } | null;
+                      created_at: string;
+                    },
+                    i: number
+                  ) => (
+                    <div
+                      key={r.id}
+                      className={i > 0 ? "pt-4" : ""}
+                      style={i > 0 ? { borderTop: "1px solid var(--desk-border)" } : {}}
+                    >
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="font-semibold text-sm" style={{ color: "var(--desk-ink)" }}>
+                          {(r.profiles as { name: string | null } | null)?.name || "Anonymous"}
                         </span>
-                      )}
-                      <span className="text-xs text-gray-400">
-                        {new Date(r.created_at).toLocaleDateString()}
-                      </span>
+                        {r.overall_rating && (
+                          <StampBadge color="teal">{r.overall_rating} / 5</StampBadge>
+                        )}
+                        <span className="text-xs" style={{ color: "var(--desk-muted)" }}>
+                          {new Date(r.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-sm leading-relaxed" style={{ color: "var(--desk-body)" }}>{r.review_text}</p>
                     </div>
-                    <p className="text-sm text-gray-700">{r.review_text}</p>
-                  </div>
-                )
-              )}
-          </CardContent>
-        </Card>
-      )}
+                  )
+                )}
+            </div>
+          )}
 
-      {/* Rating Form */}
-      {user && (
-        <div className="mt-6 pb-8">
-          <RatingForm
-            activityId={activity.id}
-            initialRating={userRating ?? undefined}
-          />
-        </div>
-      )}
+          {/* Rating Form */}
+          {user && (
+            <div className="pb-8">
+              <RatingForm
+                activityId={activity.id}
+                initialRating={userRating ?? undefined}
+              />
+            </div>
+          )}
 
-      {!user && (
-        <div className="mt-6 pb-8 text-center">
-          <p className="text-gray-500">
-            <Link href="/login" className="text-blue-600 hover:underline">
-              Sign in
-            </Link>{" "}
-            to rate this activity and save it to your library.
-          </p>
+          {!user && (
+            <div className="pb-8 text-center">
+              <p style={{ color: "var(--desk-muted)" }}>
+                <Link href="/login" className="underline underline-offset-2" style={{ color: "var(--desk-teal)" }}>
+                  Sign in
+                </Link>{" "}
+                to rate this activity and save it to your library.
+              </p>
+            </div>
+          )}
         </div>
-      )}
+
+        {/* ── Teacher Notes sidebar ── */}
+        <aside className="hidden lg:block w-60 shrink-0 mt-4">
+          <TeacherNotes activityId={activity.id} />
+        </aside>
+      </div>
     </div>
   );
 }

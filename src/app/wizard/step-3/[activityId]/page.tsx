@@ -145,7 +145,7 @@ export default function ActivityDetailPage() {
                 onClick={() => router.push("/wizard/step-3")}
                 className="text-desk-muted hover:text-desk-ink -ml-2"
               >
-                ← All activities
+                All activities
               </Button>
               <div className="flex items-center gap-2">
                 <Button
@@ -154,7 +154,7 @@ export default function ActivityDetailPage() {
                   onClick={handleCopy}
                   className="border-desk-border text-desk-body text-xs gap-1"
                 >
-                  {copied ? "✓ Copied!" : "⎘ Copy activity"}
+                  {copied ? "Copied" : "Copy activity"}
                 </Button>
                 {isPersistedId && (
                   <SaveButton activityId={activity.id} initialSaved={isSaved} />
@@ -187,7 +187,7 @@ export default function ActivityDetailPage() {
                 {activity.subject && (
                   <StampBadge color="ink">{activity.subject.replace(/_/g, " ")}</StampBadge>
                 )}
-                <StampBadge color="teal">⏱ {content.structure?.duration || "—"}</StampBadge>
+                <StampBadge color="teal">{content.structure?.duration || "—"}</StampBadge>
               </div>
               <p className="mt-3 text-sm leading-relaxed" style={{ color: "var(--desk-muted)" }}>
                 {activity.summary}
@@ -202,10 +202,10 @@ export default function ActivityDetailPage() {
               style={{ background: "var(--desk-bg)", border: "1px solid var(--desk-border)" }}
             >
               {[
-                { value: "plan", label: "📋 Plan" },
-                { value: "materials", label: "🛠 Materials" },
-                { value: "evaluation", label: "🎯 Evaluation" },
-                { value: "reflection", label: "💬 Reflection" },
+                { value: "plan", label: "Plan" },
+                { value: "materials", label: "Materials" },
+                { value: "evaluation", label: "Evaluation" },
+                { value: "reflection", label: "Reflection" },
               ].map((tab) => (
                 <TabsTrigger
                   key={tab.value}
@@ -408,7 +408,7 @@ export default function ActivityDetailPage() {
               onClick={() => router.push("/wizard/step-3")}
               className="border-desk-border text-desk-body"
             >
-              ← Back
+              Back
             </Button>
             {isPersistedId && (
               <Button
@@ -426,7 +426,7 @@ export default function ActivityDetailPage() {
         <aside className="hidden lg:block w-60 shrink-0 mt-4 space-y-4">
           <StickyCard color="yellow">
             <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "var(--desk-teal)" }}>
-              ✏️ Teacher notes
+              Teacher notes
             </p>
             <Textarea
               value={teacherNotes}

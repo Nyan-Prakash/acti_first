@@ -9,17 +9,17 @@ interface ConjureLoaderProps {
 }
 
 /**
- * ConjureLoader — generation loading state with bouncing dots
- * and a tiny sparkle icon. Subtle 1.2s animation.
+ * ConjureLoader — generation loading state with bouncing dots.
+ * Subtle 1.2s animation.
  */
 export function ConjureLoader({
   className,
-  label = "Conjuring activities…",
+  label = "Generating activities…",
   sublabel = "This usually takes 10–20 seconds",
 }: ConjureLoaderProps) {
   return (
     <div className={cn("flex flex-col items-center gap-6 py-20", className)}>
-      {/* Sparkle icon */}
+      {/* Icon */}
       <div className="relative">
         <svg
           width="40"
@@ -29,13 +29,6 @@ export function ConjureLoader({
           aria-hidden="true"
           className="text-[var(--desk-teal)]"
         >
-          <path
-            d="M20 4 L22 16 L34 14 L24 22 L28 34 L20 26 L12 34 L16 22 L6 14 L18 16 Z"
-            fill="currentColor"
-            opacity="0.9"
-          />
-          <circle cx="32" cy="8" r="2.5" fill="var(--desk-accent)" />
-          <circle cx="8" cy="30" r="1.5" fill="var(--desk-rose)" />
         </svg>
       </div>
 

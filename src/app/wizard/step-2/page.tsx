@@ -1,9 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useWizardStore } from "@/stores/wizard-store";
 import { WizardProgress } from "@/components/wizard/wizard-progress";
-import { ACTIVITY_TYPES, type ActivityType } from "@/lib/constants";
+import { ACTIVITY_TYPES, GRADE_LEVELS, type ActivityType, type GradeLevel } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -12,18 +13,39 @@ import { cn } from "@/lib/utils";
 
 export default function Step2Page() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const {
     gradeLevel,
     subject,
     activityType,
     lessonInfo,
     learningObjectives,
+    setGradeLevel,
+    setSubject,
     setActivityType,
     setLessonInfo,
     setLearningObjectives,
   } = useWizardStore();
 
-  if (!gradeLevel || !subject) {
+  // Seed store from search params when skipping step 1 via profile redirect
+  useEffect(() => {
+    const paramGrade = searchParams.get("grade");
+    const paramSubject = searchParams.get("subject");
+    const validGrades = GRADE_LEVELS.map((g) => g.value);
+
+    if (paramGrade && validGrades.includes(paramGrade as GradeLevel)) {
+      setGradeLevel(paramGrade as GradeLevel);
+    }
+    if (paramSubject) {
+      setSubject(paramSubject);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // After seeding, gradeLevel/subject may still be null on first render —
+  // only redirect back if there are no params to seed from either.
+  const hasParams = searchParams.get("grade") && searchParams.get("subject");
+  if (!gradeLevel && !subject && !hasParams) {
     router.push("/wizard/step-1");
     return null;
   }
@@ -154,12 +176,12 @@ export default function Step2Page() {
 
           <div className="flex justify-between pt-2">
             <Button
-              variant="outline"
               size="lg"
               onClick={() => router.push("/wizard/step-1")}
               className="border-[var(--desk-border)] text-[var(--desk-body)] hover:bg-[var(--desk-bg)]"
+              variant="outline"
             >
-              ← Back
+              Back
             </Button>
             <Button
               size="lg"
@@ -167,7 +189,7 @@ export default function Step2Page() {
               onClick={() => router.push("/wizard/step-3")}
               className="bg-[var(--desk-teal)] text-white hover:opacity-90 px-8 gap-2"
             >
-              ✦ Generate activities
+              Generate activities
             </Button>
           </div>
         </div>
@@ -176,7 +198,7 @@ export default function Step2Page() {
         <aside className="hidden lg:block w-56 shrink-0 mt-16 space-y-4">
           <StickyCard color="yellow">
             <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "var(--desk-teal)" }}>
-              💡 Tip
+              Tip
             </p>
             <p className="text-xs leading-relaxed" style={{ color: "var(--desk-body)" }}>
               Good lesson info includes: the unit topic, key concepts, any prior knowledge
@@ -184,10 +206,10 @@ export default function Step2Page() {
             </p>
           </StickyCard>
           <StickyCard color="teal">
-            <p className="text-xs font-bold uppercase tracking-widest mb-2 text-white">
-              ✎ Example objective
+            <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "var(--desk-ink)" }}>
+              Example objective
             </p>
-            <p className="text-xs leading-relaxed text-white/80">
+            <p className="text-xs leading-relaxed" style={{ color: "var(--desk-body)" }}>
               &ldquo;Students will be able to compare two opposing historical theories and
               support their position with at least two pieces of evidence.&rdquo;
             </p>
@@ -197,4 +219,3 @@ export default function Step2Page() {
     </div>
   );
 }
-

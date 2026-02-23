@@ -194,8 +194,8 @@ export default function Step3Page() {
         {/* Loading state */}
         {isGenerating && (
           <ConjureLoader
-            label="Conjuring your activities…"
-            sublabel="Brewing up 4 tailored lesson plans — this takes 10–20 seconds"
+            label="Generating your activities…"
+            sublabel="Crafting 4 tailored lesson plans — this takes 10–20 seconds"
           />
         )}
 
@@ -238,7 +238,7 @@ export default function Step3Page() {
             onClick={() => router.push("/wizard/step-2")}
             className="border-[var(--desk-border)] text-[var(--desk-body)] hover:bg-[var(--desk-bg)]"
           >
-            ← Back
+            Back
           </Button>
           {!isGenerating && generatedActivities.length > 0 && (
             <Button
@@ -252,7 +252,7 @@ export default function Step3Page() {
               }}
               className="border-[var(--desk-teal)] text-[var(--desk-teal)] hover:bg-[var(--desk-teal)]/5 gap-1.5"
             >
-              ↺ Regenerate
+              Regenerate
             </Button>
           )}
         </div>
